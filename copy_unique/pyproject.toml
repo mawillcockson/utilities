@@ -1,0 +1,56 @@
+[tool.poetry]
+name = "copy_unique"
+version = "0.0.0"
+description = "copies files ensuring uniqueness with hashing; very slow"
+authors = ["Matthew Willcockson <matthew@willcockson.family>"]
+repository = "https://github.com/mawillcockson/utilities"
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.7"
+importlib-metadata = {version = "latest", python = "<3.8"}
+decli = "^0.5.2"
+
+[tool.poetry.dev-dependencies]
+pytest = "^5.2"
+black = "^20.8b1"
+tox = "^3.20.1"
+mypy = "^0.790"
+pytest-timeout = "^1.4.2"
+pylint = "^2.6.0"
+isort = "^5.7.0"
+
+[tool.pytest.ini_options]
+minversion = "6.2.0" # First version to have easily accessible types
+addopts = "--strict-markers"
+# I don't plan on leaving parametersets empty
+# https://docs.pytest.org/en/stable/reference.html#confval-empty_parameter_set_mark
+empty_parameter_set_mark = "fail_at_collect"
+log_cli = true
+timeout = 60
+markers = [
+    "select: Temporary mark for selecting specific tests"
+]
+
+[tool.isort]
+profile = "black"
+# Ensures the output doesn't save if the resulting file contains syntax errors
+atomic = true
+# Add an explicitly defined source path (modules within src paths have their
+# imports automatically catorgorized as first_party)
+src_paths = ["copy_unique", "tests"]
+
+# From:
+# https://github.com/psf/black/blob/master/docs/compatible_configs/pylint/pyproject.toml
+[tool.pylint.messages_control]
+disable = "C0330, C0326"
+
+[tool.pylint.format]
+max-line-length = "88"
+
+[tool.poetry.scripts]
+copy_unique = "copy_unique.__main__:main"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
