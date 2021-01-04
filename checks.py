@@ -125,8 +125,7 @@ def run_checks(project_dir: Path) -> None:
     path = project_dir.resolve(strict=True)
     check_file = path / "checks.py"
     assert check_file.is_file(), f"check file '{check_file}' must be a file"
-    # NOTE:TEMP disable these for now
-    # run_py(path=check_file)
+    run_py(path=check_file)
 
 
 def sub_projects(path: Path = Path(".")) -> List[Path]:
