@@ -15,5 +15,5 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Run checks
-        run: python ./checks.py
+        run: python3 ./checks.py
 ...
