@@ -160,7 +160,7 @@ def check_ci_files(ci_files: CIFiles) -> None:
         [
             sys.executable,
             "-c",
-            'import pipx.main;[print(f"{name}: {getattr(pipx.main.constant, name)}") for name in dir(pipx.main.constants)]',
+            'import pipx.main;[print(f"{name}: {getattr(pipx.main.constants, name)}") for name in dir(pipx.main.constants)]',
         ]
     )
 
