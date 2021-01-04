@@ -167,10 +167,7 @@ def check_ci_files(ci_files: CIFiles) -> None:
         ]
     )
     pipx_local_bin = Path(result.stdout.strip()).resolve(strict=True)
-    local_bin = (Path().home() / ".local" / "bin").resolve(strict=True)
-    assert local_bin.is_dir(), f"'{local_bin}' must be a directory"
     assert pipx_local_bin.is_dir(), f"'{pipx_local_bin}' must be a directory"
-    add_to_path(local_bin)
     add_to_path(pipx_local_bin)
 
     # Install linting tools
