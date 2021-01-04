@@ -21,5 +21,5 @@ jobs:
           architecture: 'x64'
 
       - name: Run checks
-        run: python3 ./checks.py
+        run: python ./checks.py
 ...
