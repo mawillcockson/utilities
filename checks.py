@@ -125,7 +125,8 @@ def run_checks(project_dir: Path) -> None:
     path = project_dir.resolve(strict=True)
     check_file = path / "checks.py"
     assert check_file.is_file(), f"check file '{check_file}' must be a file"
-    run_py(path=check_file)
+    # NOTE:TEMP disable these for now
+    # run_py(path=check_file)
 
 
 def sub_projects(path: Path = Path(".")) -> List[Path]:
@@ -156,15 +157,21 @@ def check_ci_files(ci_files: CIFiles) -> None:
     # Install pipx
     run_pip("install --user --upgrade pipx".split())
     run_tool([sys.executable, "-m", "pipx", "ensurepath"])
-    run_tool(
+
+    # Add pipx paths to $PATH
+    result = run_tool(
         [
             sys.executable,
             "-c",
-            'import pipx.main;[print(f"{name}: {getattr(pipx.main.constants, name)}") for name in dir(pipx.main.constants)]',
+            'import pipx.main;print(pipx.main.constants.LOCAL_BIN_DIR, end="")',
         ]
     )
-
-    sys.exit(1)
+    pipx_local_bin = Path(result.stdout.strip()).resolve(strict=True)
+    local_bin = (Path().home() / ".local" / "bin").resolve(strict=True)
+    assert local_bin.is_dir(), f"'{local_bin}' must be a directory"
+    assert pipx_local_bin.is_dir(), f"'{pipx_local_bin}' must be a directory"
+    add_to_path(local_bin)
+    add_to_path(pipx_local_bin)
 
     # Install linting tools
     pipx_install(["isort"])
@@ -173,9 +180,6 @@ def check_ci_files(ci_files: CIFiles) -> None:
     pipx_install(["mypy"])
 
     # Find linting tool executables
-    local_bin = (Path().home() / ".local" / "bin").resolve(strict=True)
-    assert local_bin.is_dir(), f"'{local_bin}' must be a directory"
-    add_to_path(local_bin)
     isort_exe = which("isort")
     black_exe = which("black")
     pylint_exe = which("pylint")
