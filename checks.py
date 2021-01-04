@@ -1,9 +1,12 @@
+# pylint: disable=inherit-non-class, too-few-public-methods
+# pylint: disable=unsubscriptable-object
 """
 Runs the checks for each repository
 """
+import subprocess
 import sys
 from pathlib import Path
-from subprocess import run, CompletedProcess
+from subprocess import CompletedProcess  # pylint: disable=unused-import
 from typing import List, NamedTuple, Optional
 
 assert sys.version_info >= (3, 7), "Need Python 3.7+"
@@ -26,14 +29,20 @@ def in_git_dir(path: Path) -> bool:
 def find_ci_files(path: Path = Path(".")) -> CIFiles:
     "list all the python files used by the ci system"
     # List the check files
-    check_files = [path for path in Path(".").glob("**/checks.py") if not in_git_dir(path)]
+    check_files = [
+        path for path in Path(".").glob("**/checks.py") if not in_git_dir(path)
+    ]
     return CIFiles(checks=check_files)
 
 
-def run_tool(args: List[str], cwd: Optional[Path] = None, check: bool = True) -> CompletedProcess:
+def run_tool(
+    args: List[str], cwd: Optional[Path] = None, check: bool = True
+) -> "CompletedProcess[str]":
     "passes standard arguments to subprocess.run"
     print(f"exec> {' '.join(args)}")
-    result = run(args=args, cwd=cwd, capture_output=True, text=True, check=check)
+    result = subprocess.run(
+        args=args, cwd=cwd, capture_output=True, text=True, check=check
+    )
     print(result.stdout)
     if result.stderr:
         print(result.stderr)
@@ -47,8 +56,8 @@ def run_py(path: Path) -> None:
     run_tool([sys.executable, str(path)], cwd=path.parent, check=False)
 
 
-def check(project_dir: Path) -> None:
-    "runs the check.py in a project directory"
+def run_checks(project_dir: Path) -> None:
+    "runs the checks.py in a project directory"
     assert project_dir.is_dir(), "Project directory must be a directory"
     path = project_dir.resolve(strict=True)
     check_file = path / "checks.py"
@@ -120,7 +129,7 @@ def check_ci_files(ci_files: CIFiles) -> None:
 def main() -> None:
     "main function that's run when this file is called as a script"
     for project_dir in sub_projects():
-        check(project_dir=project_dir)
+        run_checks(project_dir=project_dir)
 
     check_ci_files(ci_files=find_ci_files())
 

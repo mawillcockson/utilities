@@ -23,7 +23,7 @@ import subprocess
 import sys
 from pathlib import Path
 from shutil import which
-from subprocess import CompletedProcess
+from subprocess import CompletedProcess  # pylint: disable=unused-import
 from typing import Dict, List, Mapping, NamedTuple, Optional, Tuple, cast
 from warnings import warn
 
@@ -54,7 +54,7 @@ def run(
     check: bool = True,
     print_stdout: bool = True,
     env: Optional[Mapping[str, str]] = None,
-) -> CompletedProcess[str]:
+) -> "CompletedProcess[str]":
     "run subprocess.run with common arguments"
     print(f"exec> {' '.join(args)}")
 
