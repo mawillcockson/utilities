@@ -158,7 +158,7 @@ def check_ci_files(ci_files: CIFiles) -> None:
     run_tool([sys.executable, "-m", "pipx", "ensurepath"])
     import pipx.main
     for name in dir(pipx.main.constants):
-        print(f"{name}: {getattr(pipx.main.constant, name}")
+        print(f"{name}: {getattr(pipx.main.constant, name)}")
 
     sys.exit(1)
 
@@ -170,7 +170,7 @@ def check_ci_files(ci_files: CIFiles) -> None:
 
     # Find linting tool executables
     local_bin = (Path().home() / ".local" / "bin").resolve(strict=True)
-    assert local_bin.is_dir(), f"'{pipx_bin}' must be a directory"
+    assert local_bin.is_dir(), f"'{local_bin}' must be a directory"
     add_to_path(local_bin)
     isort_exe = which("isort")
     black_exe = which("black")
