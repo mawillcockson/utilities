@@ -4,12 +4,12 @@
 Runs the checks for each repository
 """
 import os
+import shutil
 import subprocess
 import sys
 from pathlib import Path
 from subprocess import CompletedProcess  # pylint: disable=unused-import
 from typing import List, NamedTuple, Optional
-import shutil
 
 assert sys.version_info >= (3, 7), f"Need Python 3.7+; got {sys.version}"
 
@@ -165,8 +165,8 @@ def check_ci_files(ci_files: CIFiles) -> None:
 
     # Find linting tool executables
     local_bin = (Path().home() / ".local/bin").resolve(strict=True)
-    assert pipx_bin.is_dir(), f"'{pipx_bin}' must be a directory"
-    add_to_path(pipx_bin)
+    assert local_bin.is_dir(), f"'{pipx_bin}' must be a directory"
+    add_to_path(local_bin)
     isort_exe = which("isort")
     black_exe = which("black")
     pylint_exe = which("pylint")
