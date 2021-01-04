@@ -9,6 +9,7 @@ import sys
 from pathlib import Path
 from subprocess import CompletedProcess  # pylint: disable=unused-import
 from typing import List, NamedTuple, Optional
+import shutil
 
 assert sys.version_info >= (3, 7), f"Need Python 3.7+; got {sys.version}"
 
@@ -16,6 +17,16 @@ assert sys.version_info >= (3, 7), f"Need Python 3.7+; got {sys.version}"
 class CIFiles(NamedTuple):
     "all of the build files"
     checks: List[Path]
+
+
+def which(command_name: str) -> Path:
+    "check if a command is available"
+    print(f"checking for '{command_name}'")
+    path = shutil.which(command_name)
+    if not path:
+        raise FileNotFoundError(f"No command '{command_name}' found")
+
+    return Path(path).resolve(strict=True)
 
 
 def add_to_github_path(path: Path) -> None:
@@ -153,13 +164,13 @@ def check_ci_files(ci_files: CIFiles) -> None:
     pipx_install(["mypy"])
 
     # Find linting tool executables
-    pipx_bin = (Path().home() / ".local/bin").resolve(strict=True)
-    add_to_path(pipx_bin)
+    local_bin = (Path().home() / ".local/bin").resolve(strict=True)
     assert pipx_bin.is_dir(), f"'{pipx_bin}' must be a directory"
-    isort_exe = pipx_bin / "isort"
-    black_exe = pipx_bin / "black"
-    pylint_exe = pipx_bin / "pylint"
-    mypy_exe = pipx_bin / "mypy"
+    add_to_path(pipx_bin)
+    isort_exe = which("isort")
+    black_exe = which("black")
+    pylint_exe = which("pylint")
+    mypy_exe = which("mypy")
 
     # Find mypy.ini
     mypy_ini = Path("./mypy.ini").resolve(strict=True)
