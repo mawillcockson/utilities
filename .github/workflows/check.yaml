@@ -14,6 +14,12 @@ jobs:
       - name: Checkout Commit
         uses: actions/checkout@v2
 
+      - name: Ensure recent Python version is installed
+        uses: actions/setup-python@v2
+          with:
+            python-version: '3.x'
+            architecture: 'x64'
+
       - name: Run checks
         run: python3 ./checks.py
 ...
