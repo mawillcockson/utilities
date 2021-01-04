@@ -144,6 +144,10 @@ def add_to_path(path: Path) -> None:
 def add_pyenv_to_path(pyenv_root: Path) -> None:
     "add pyenv executables and shims to the PATH"
     pyenv_shims = pyenv_root / "shims"
+    try:
+        pyenv_shims.mkdir()
+    except FileExistsError:
+        pass
     pyenv_bin = pyenv_root / "bin"
     # Add in reverse order so shims come first, just like how pyenv-installer
     # and "pyenv init -" set it up
@@ -215,7 +219,12 @@ def install_pyenv_windows() -> None:
         raise ValueError(json_error_msg)
 
     latest_release_data = pyenv_win_releases[0]
-    latest_release_tag = latest_release_data.get("tag_name", default=None)
+    # NOTE:BUG none of the linters, including mypy, caught the fact that the
+    # commented line produces the following error:
+    # TypeError: dict.get() takes no keyword arguments
+    # 
+    # latest_release_tag = latest_release_data.get("tag_name", default=None)
+    latest_release_tag = latest_release_data.get("tag_name", None)
     if not latest_release_tag:
         raise ValueError(json_error_msg)
 

@@ -114,7 +114,7 @@ def run_py(path: Path) -> None:
     "runs a .py file with python"
     assert path.is_file(), f"'{path}' must be a file"
     assert path.suffix == ".py", f"'{path}' must be a .py file"
-    run_tool([sys.executable, str(path)], cwd=path.parent, check=False)
+    run_tool([sys.executable, str(path)], cwd=path.parent)
 
 
 def run_checks(project_dir: Path) -> None:
