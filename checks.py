@@ -156,6 +156,11 @@ def check_ci_files(ci_files: CIFiles) -> None:
     # Install pipx
     run_pip("install --user --upgrade pipx".split())
     run_tool([sys.executable, "-m", "pipx", "ensurepath"])
+    import pipx.main
+    for name in dir(pipx.main.constants):
+        print(f"{name}: {getattr(pipx.main.constant, name}")
+
+    sys.exit(1)
 
     # Install linting tools
     pipx_install(["isort"])
