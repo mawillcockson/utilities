@@ -234,9 +234,9 @@ def install_pyenv_windows() -> None:
             "-C",
             (
                 "git clone "
-                "--depth 1"
-                f"--branch {latest_release_tag}"
-                f"{PYENV_WIN_REPO_URL}"
+                "--depth 1 "
+                f"--branch {latest_release_tag} "
+                f"{PYENV_WIN_REPO_URL} "
                 '"$HOME/.pyenv"'
             ),
         ]
