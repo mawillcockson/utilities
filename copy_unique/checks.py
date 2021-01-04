@@ -57,21 +57,28 @@ def run(
 ) -> "CompletedProcess[str]":
     "run subprocess.run with common arguments"
     print(f"exec> {' '.join(args)}")
+    if cwd:
+        print(f"in: {cwd}")
 
     result = subprocess.run(
         args=args,
         input=input_to_stdin,
         cwd=cwd,
-        check=check,
+        check=False,
         env=env,
         capture_output=True,
         text=True,
+        timeout=120,
     )
 
     if print_stdout:
         print(result.stdout)
     if result.stderr:
         print(result.stderr)
+
+    if check and result.returncode != 0:
+        raise ValueError("process returned non-zero exit status")
+
     return result
 
 
@@ -330,15 +337,29 @@ def pipx_install(args: List[str]) -> None:
 
 def install_poetry() -> None:
     "install poetry tool from https://python-poetry.org"
-    # Upgrade pip
-    pip_install("pip setuptools wheel".split())
-    pip_install(["pipx"])
-    pipx_install(["poetry"])
-    run([sys.executable, "-m", "pipx", "ensurepath"], check=False)
-    pipx_shims = (Path().home() / ".local" / "bin").resolve(strict=True)
-    # Add pipx shims to PATH
-    add_to_path(pipx_shims)
-    assert check_present("poetry", strict=False), "pipx paths not configured"
+    if check_present("poetry", strict=False):
+        warn("poetry already installed")
+    else:
+        # Upgrade pip
+        pip_install("pip setuptools wheel".split())
+        pip_install(["pipx"])
+        pipx_install(["poetry"])
+        run([sys.executable, "-m", "pipx", "ensurepath"], check=False)
+        pipx_shims = (Path().home() / ".local" / "bin").resolve(strict=True)
+        # Add pipx shims to PATH
+        add_to_path(pipx_shims)
+        assert check_present("poetry", strict=False), "pipx paths not configured"
+
+    # NOTE: On some installations, poetry had to be run by absolute path
+    poetry_exe = check_present("poetry")
+    assert poetry_exe  # for mypy
+    add_to_path(poetry_exe)
+
+
+def pyenv_install(versions: List[str]) -> None:
+    "run pyenv install with the correct options for each version"
+    for version in versions:
+        run(["pyenv", "install", "--skip-existing", version])
 
 
 def main() -> None:
@@ -351,22 +372,25 @@ def main() -> None:
     else:
         raise NotImplementedError(f"not implemented for platform '{sys.platform}'")
 
-    pyenv_root = Path(run(["pyenv", "root"]).stdout).resolve(strict=True)
+    pyenv_root = Path(run(["pyenv", "root"]).stdout.strip()).resolve(strict=True)
 
     # Install necessary python versions
     recent_stable_cpython = [
         version for version in pyenv_stable_cpython() if not version.startswith("3.6")
     ]
-    run(["pyenv", "install", "3.8.5", "3.7.3"] + recent_stable_cpython)
+    pyenv_install(["3.8.5", "3.7.3"] + recent_stable_cpython)
     run(["pyenv", "local"] + recent_stable_cpython)
 
     # Install poetry
     install_poetry()
     # Install project dependencies
+    run(["poetry", "env", "use", sys.executable])
     run(["poetry", "install", "--no-interaction", "--verbose"])
+    env = os.environ.copy()
+    env.update({"PYENV_ROOT": str(pyenv_root), "TOX_PARALLEL_NO_SPINNER": "1"})
     run(
         ["poetry", "run", "tox"],
-        env={"PYENV_ROOT": str(pyenv_root), "TOX_PARALLEL_NO_SPINNER": "1"},
+        env=env,
     )
 
 
