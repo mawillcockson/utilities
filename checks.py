@@ -3,6 +3,7 @@
 """
 Runs the checks for each repository
 """
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -15,6 +16,46 @@ assert sys.version_info >= (3, 7), f"Need Python 3.7+; got {sys.version}"
 class CIFiles(NamedTuple):
     "all of the build files"
     checks: List[Path]
+
+
+def add_to_github_path(path: Path) -> None:
+    "if running on a GitHub Actions runner, persist path across steps"
+    # NOTE:CI the GITHUB_PATH environment variable points to a file that is
+    # read bottom to top to build the PATH environment variable for subsequent
+    # actions
+    # From:
+    # https://docs.github.com/en/free-pro-team@latest/actions/reference/workflow-commands-for-github-actions#adding-a-system-path
+    github_path = os.getenv("GITHUB_PATH", default=None)
+    if not github_path:
+        # The "GITHUB_PATH" environment variable only exists in GitHub Actions
+        # runners
+        return
+
+    print(f"adding '{path}' for GITUB_PATH")
+    with open(github_path, mode="a") as file:
+        file.write(str(path.resolve(strict=True)))
+
+
+def add_to_path(path: Path) -> None:
+    "prepend a path to PATH"
+    absolute_path = path.resolve(strict=True)
+    current_path = os.environ["PATH"]
+    if str(absolute_path) not in current_path.split(sep=os.pathsep):
+        print(f"adding '{absolute_path}' to $PATH")
+        os.environ["PATH"] = os.pathsep.join((str(absolute_path), current_path))
+    add_to_github_path(absolute_path)
+    bashrc = Path("~/.bashrc").expanduser().resolve()
+    if not bashrc.is_file():
+        return
+
+    bashrc_text = bashrc.read_text()
+    if str(absolute_path) in bashrc_text:
+        return
+
+    with bashrc.open(mode="a") as file:
+        print(f"adding '{absolute_path}' to ~/.bashrc")
+        bash_path = os.pathsep.join((str(absolute_path), "${PATH}"))
+        file.write(f'export PATH="{bash_path}"')
 
 
 def in_git_dir(path: Path) -> bool:
@@ -103,6 +144,7 @@ def check_ci_files(ci_files: CIFiles) -> None:
 
     # Install pipx
     run_pip("install --user --upgrade pipx".split())
+    run_tool([sys.executable, "-m", "pipx", "ensurepath"])
 
     # Install linting tools
     pipx_install(["isort"])
@@ -111,7 +153,8 @@ def check_ci_files(ci_files: CIFiles) -> None:
     pipx_install(["mypy"])
 
     # Find linting tool executables
-    pipx_bin = Path("~/.local/bin").expanduser().resolve(strict=True)
+    pipx_bin = (Path().home() / ".local/bin").resolve(strict=True)
+    add_to_path(pipx_bin)
     assert pipx_bin.is_dir(), f"'{pipx_bin}' must be a directory"
     isort_exe = pipx_bin / "isort"
     black_exe = pipx_bin / "black"
