@@ -8,21 +8,11 @@ This tool is incredibly slow. [`rsync`][] is a better tool.
 
 ## Installation
 
-It's suggested to use [`pipx`][]:
+This project is not installable yet, but can be used from source.
 
-```sh
-python -m pip install --user --upgrade pip setuptools wheel pipx
-python -m pipx ensurepath
-python -m pipx install 'git+https://github.com/mawillcockson/utilities#egg=copy_unique&subdirectory=copy_unique'
-```
-
-Plain [`pip`][] should be:
-
-```sh
-python -m pip install --user --upgrade pip setuptools wheel
-python -m pip install --user 'git+https://github.com/mawillcockson/utilities#egg=copy_unique&subdirectory=copy_unique'
-```
+[`poetry`][] is used for dependency management and building.
 
 [`rsync`]: <https://rsync.samba.org/> "rsync homepage"
 [`pipx`]: <https://pipxproject.github.io/pipx/installation/> "pipx installation documentation"
 [`pip`]: <https://pip.pypa.io/en/stable/reference/pip_install/#vcs-support> "pip VCS url documentation"
+[`poetry`]: <https://python-poetry.org/> "poetry main website"
