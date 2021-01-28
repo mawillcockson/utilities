@@ -7,6 +7,19 @@ on:
     types: [created]
 
 jobs:
+  always_run:
+    runs-on: ubuntu-latest
+    defaults:
+      shell: bash
+    steps:
+      - name: Always run
+        # NOTE:BUG https://github.community/t/workflow-is-failing-if-no-job-can-be-ran-due-to-condition/16873/2
+        run: |
+          echo "This job is included because GitHub Actions marks the workflow as having "\
+               "'failed at startup' if no jobs are run, and the other job in this workflow "\
+               "is likely to be skipped"
+
+
   generate_guestfs:
     name: Generate guestfs index
     if: "(github.event.id == 4 && github.event.body == 'Please update the guestfs index.')"
