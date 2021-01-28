@@ -84,3 +84,4 @@ jobs:
               --header "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
               --url "https://api.github.com/repos/${{ github.repository }}/issues/4"
               --data '{"state":"closed"}'
+...
