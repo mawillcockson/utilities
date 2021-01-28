@@ -263,7 +263,7 @@ def parse_args(argv: Optional[Sequence[str]] = None) -> Namespace:
     parser.add_argument(
         "--hash",
         action="store_true",
-        help="download all packages and add hashes to index",
+        help="download all packages and add hashes to index; not currently implemented",
     )
     parser.add_argument(
         "--debug", action="store_true", help="print out debugging statements to stderr"
