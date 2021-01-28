@@ -1,8 +1,11 @@
 [tool.poetry]
 name = "guestfs_generator"
 version = "0.0.0"
-description = ""
+description = "a wrapper around dumb-pypi specifically for libguestfs Python bindings package"
 authors = ["Matthew Willcockson <matthew@willcockson.family>"]
+readme = "README.md"
+license = "MIT"
+repository = "https://github.com/mawillcockson/utilities/tree/guestfs_generator/guestfs_generator"
 
 [tool.poetry.dependencies]
 python = "^3.9"
@@ -46,6 +49,7 @@ src_paths = ["guestfs_generator", "tests"]
 
 [tool.poetry.scripts]
 guestfs-generator = "guestfs_generator.main:main"
+dumb-pypi = "dumb_pypi.main:main"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
