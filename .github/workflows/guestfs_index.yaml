@@ -57,7 +57,7 @@ jobs:
         uses: peter-evans/create-pull-request@v3.7.0
         with:
           path: "${{ github.workspace }}/gh-pages"
-          commit-message: "feat(gh-pages/guestfs_index): update by GitHub Actions; closes #4"
+          commit-message: "feat(gh-pages/guestfs_index): update by GitHub Actions"
           # From: https://github.community/t/github-actions-bot-email-address/17204/5
           author: "github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>"
           branch: update_guestfs_index
@@ -75,3 +75,12 @@ jobs:
           MERGE_REMOVE_LABELS: "${{ env.AUTOMERGE_LABEL }}"
           MERGE_METHOD: merge
           MERGE_DELETE_BRANCH: true
+
+      - name: "Mark issue #4 as closed"
+        run: |
+          curl \
+              --request PATCH \
+              --header "Accept: application/vnd.github.v3+json" \
+              --header "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+              --url "https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPOSITORY}/issues/4"
+              --data '{"state":"closed"}'
