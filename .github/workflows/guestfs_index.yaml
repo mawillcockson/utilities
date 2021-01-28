@@ -20,7 +20,7 @@ jobs:
           echo "This job is included because GitHub Actions marks the workflow as having "\
                "'failed at startup' if no jobs are run, and the other job in this workflow "\
                "is likely to be skipped"
-          python -c "import os;print(os.environ['GITHUB_EVENT'])"
+          python3 -c "import os;print(os.environ['GITHUB_EVENT'])"
 
 
   generate_guestfs:
