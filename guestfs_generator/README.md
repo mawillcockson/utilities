@@ -36,11 +36,20 @@ For example, `pip` has the [`--extra-index-url`][] option:
 python -m pip install --extra-index-url https://mawillcockson.github.io/utilities/guestfs_index/simple/
 ```
 
+For [`poetry`][], add a [`[[tool.poetry.source]]` section to `pyproject.toml`][poetry-extra-source]:
+
+```toml
+[[tool.poetry.source]]
+name = "guestfs"
+url = "https://mawillcockson.github.io/utilities/guestfs_index/simple/"
+secondary = true
+```
+
 It's very important that the entire url be entered correctly. Some tools behave strangely if, for instance, the slash at the end is left off.
 
 ## How to regenerate the `guestfs` index
 
-If the index available at <https://mawillcockson.github.io/utilities/guestfs_index/simple/> is not up to date with the source index at <https://download.libguestfs.org/python/>, then leave a comment on issue #4 with the exact text below:
+If the index available at <https://mawillcockson.github.io/utilities/guestfs_index/simple/> is not up to date with the source index at <https://download.libguestfs.org/python/>, then leave a comment on [issue #4][] with the exact text below:
 
 ```
 Please update the guestfs index.
@@ -59,3 +68,6 @@ If the index is not updated, or the workflow fails in another way, please open a
 [this issue comment]: <https://github.com/python-poetry/poetry/issues/1391#issuecomment-600135563> "issue comment that inspired this"
 [`--extra-index-url`]: <https://pip.pypa.io/en/stable/reference/pip_install/#install-extra-index-url> "documentation on pip's --extra-index-url option"
 [`guestfs_index.yaml`]: <https://github.com/mawillcockson/utilities/blob/main/.github/workflows/guestfs_index.yaml> "The guestfs_index workflow file for GitHub Actions"
+[`poetry`]: <https://python-poetry.org/> "Main python poetry website"
+[poetry-extra-source]: <https://python-poetry.org/docs/repositories/#install-dependencies-from-a-private-repository> "Explanation of how to add addition sources in poetry"
+[issue #4]: <https://github.com/mawillcockson/utilities/issues/4> "Issue #4"
