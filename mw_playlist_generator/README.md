@@ -1,30 +1,66 @@
 # Playlist Generator
 
-This is the first iteration of these sets of scripts. These have many, many shortcomings:
+This tool helps download videos, and organize them into playlists.
 
-- Hard-coded paths
-- Only generates one playlist
-- Does not handle errors consistently
-- Requires managing text files and manually running a script
-- Videos are hard to remove
-- Supports exactly one workflow
+## Installation
 
-I think this could be done better.
+[`pipx`][] is the preferred way to install this tool. First, [install `pipx`][], then:
 
-My first goal is to consolidate the functionality into one tool. This would really just be an implementation detail, but there are some goals, like making it easier to associate videos with urls, to make removing ideos easier, I can take advantage of [the very nice API `youtube-dl` provides embedding](https://github.com/ytdl-org/youtube-dl#embedding-youtube-dl).
+```sh
+pipx install "git+https://github.com/mawillcockson/utilities#egg=mw_playlist_generator&subdirectory=mw_playlist_generator"
+```
 
-The goals of this current rewrite are:
+This should make the `playlist-generator` command line tool available.
 
-- Make it easier to generate and update multiple playlists
+## Use
 
-That's it for now.
+This tool takes input mainly in the form of text files specifying which videos to download. Its only command-line argument is for specifying a configuration file:
 
-I think with a more complete framework in place, even a simple one, it will be easier to plan the other features.
+```sh
+playlist-generator --config configuration.ini
+```
 
-The stretch goals for this as a whole would be:
+The configuration file looks like this:
 
-- Make it easy to remove a specific video, and ensure the corresponding source is remembered as undesirable
-- Remove the need for manually running the tool: it is run automatically on file changes
-- Provide installation through a single command or executable, with no dependencies on existing tools
-- Automatic updates
-- Provide a web interface for managing and playing playlists of videos
+```ini
+[playlists]
+urls = urls/
+playlists = playlists/
+videos = Videos/
+scripts = scripts_DO_NOT_DELETE/
+```
+
+### Configuration file
+
+The configuration file can be placed anywhere. Any paths in the file that are not absolute, are **relative to the location of the configuration file**.
+
+The `[playlists]` section header is required.
+
+#### `urls`
+
+The folder of URL lists.
+
+Each file in the folder should be a text file. The name of the playlist file will be used as the name of the resulting playlist.
+
+#### `playlists`
+
+The folder where the generated playlist files are stored.
+
+#### `videos`
+
+The folder where the tool should store videos.
+
+All videos stored in this folder will be named by video ID. The video IDs are largely globally unique, so there should't be much of a problem with storing them all in one place.
+
+#### `scripts`
+
+The folder that's used by this tool to store files it needs to function. The contents of this folder should probably not be modified manually.
+
+## Disclaimer
+
+Though anyone is free to use this, I only intend to support my own workflow.
+
+This uses [`youtube-dl`][] internally, but only exposes a tiny fraction of its features. For a much more mature and general-purpose tool, check out [`youtube-dl`][].
+
+
+[`youtube-dl`]: <https://github.com/ytdl-org/youtube-dl> "youtube-dl on GitHub"
