@@ -12,11 +12,11 @@ from .types import OpenablePath
 pretty = partial(pformat, indent=2, compact=False)
 
 
-def filter_inaccessible(files: Iterable[Union[str, Path]]) -> Iterable[OpenablePath]:
+def filter_inaccessible(files: Iterable[Union[str, Path]]) -> Iterable[Path]:
     "removes files that don't exist anymore"
     for file in files:
         try:
-            path = OpenablePath(file)
+            path = Path(str(OpenablePath(file)))
         except TypeError:
             log.debug("filtered '%s'", file)
 

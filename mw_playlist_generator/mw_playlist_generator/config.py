@@ -41,10 +41,12 @@ def save_config(config: ConfigParser, settings: Settings) -> str:
     save the configuration to the file indicated in settings
     returns the config file contents as a string
     """
-    if settings.cache == settings.config.parent:
+    # NOTE: Because neither Directory nor OpenablePath are subclasses of Path,
+    # this wrapping is needed in order to compare them
+    if Path(str(settings.cache)) == Path(settings.config.parent):
         settings_dict = settings.dict(exclude={"config", "cache"})
     else:
-        settings_dict = settings.dict(exclude=["config"])
+        settings_dict = settings.dict(exclude={"config"})
 
     config_dict = {"playlists": settings_dict}
     config.read_dict(config_dict, source=f"{__name__}.save_config.config_dict")
@@ -57,9 +59,10 @@ def save_config(config: ConfigParser, settings: Settings) -> str:
     # is needed to move the position to the beginning of the file, so that it
     # can be read from the start
     config_string.seek(0)
-    log.debug("saved configuration:\n%s", config_string.read())
+    config_text = config_string.read()
+    log.debug("saved configuration:\n%s", config_text)
 
-    return config
+    return config_text
 
 
 def load_config(path: Union[str, Path]) -> Settings:
