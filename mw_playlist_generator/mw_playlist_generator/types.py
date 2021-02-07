@@ -4,11 +4,19 @@ custom types used by other modules
 from abc import ABC, abstractmethod
 from argparse import ArgumentTypeError
 from pathlib import Path
-from typing import Dict, Iterable, List, Type, Union  # pylint: disable=unused-import
+from typing import (  # pylint: disable=unused-import
+    Dict,
+    Iterable,
+    List,
+    Type,
+    Union,
+    cast,
+)
 
 from .logging import log
 
 PostProcessors = List[Dict[str, str]]
+PathType = Union[str, Path]
 
 
 class ConfigError(ValueError):
@@ -20,66 +28,24 @@ class ArgumentValidationError(ArgumentTypeError, TypeError):
 
 
 class StrictPath(ABC):
-    "defines methods common to OpenablePath and Directory"
+    """
+    a base class meant to be the left-most class in the list of classes a
+    deriving class subclasses
 
-    def __init__(self, filename: "Union[str, Path, None, StrictPath]" = None):
-        "runs the check"
-        self.path = self._check(str(filename))
+    the current implementation for this doesn't make any methods of deriving
+    classes available on instances
 
-    @property
-    def stem(self) -> str:
-        "the final path component, minus its last suffix"
-        return self.path.stem
+    for that, bind the methods in the class namespace to the Path() instance
+    created in __new__()
 
-    def read_text(self) -> str:
-        "open the file in text mode, read it, and close the file"
-        return self.path.read_text()
+    see:
+    https://stackoverflow.com/a/1015405
+    """
 
-    def write_text(self, text: str) -> None:
-        "open the file in text mode, write to it, and close the file"
-        self.path.write_text(text)
-
-    def __truediv__(self, path: "Union[str, Path, StrictPath]") -> Path:
-        "combine paths"
-        if isinstance(path, StrictPath):
-            return self.path / str(path)
-
-        return self.path / path
-
-    def is_dir(self) -> bool:
-        "checks if the path is a directory"
-        return self.path.is_dir()
-
-    def is_file(self) -> bool:
-        "checks if the path is a file"
-        return self.path.is_file()
-
-    def glob(self, pattern: str) -> Iterable[Path]:
-        """
-        iterate over this subtree and yield all existing files (of any kind,
-        including directories) matching the given relative pattern
-        """
-        yield from self.path.glob(pattern)
-
-    @property
-    def parent(self) -> Path:
-        "the logical parent of the path"
-        return self.path.parent
-
-    def __str__(self) -> str:
-        """
-        return the string representation of the path, suitable for passing to
-        system calls
-        """
-        return str(self.path)
-
-    @abstractmethod
-    @staticmethod
-    def _check(filename: Union[str, Path, None] = None) -> Path:
-        "the method that implements the custom check behaviour"
-        raise NotImplementedError(
-            "This method must be implemented in the deriving class"
-        )
+    def __new__(cls, value: PathType) -> "StrictPath":
+        # pylint: disable=arguments-differ
+        "create a new instance of pathlib.Path with stricter requirements"
+        return cast(StrictPath, cls._check(value))
 
     @classmethod
     def __get_validators__(
@@ -88,19 +54,29 @@ class StrictPath(ABC):
         "enables pydantic to use this as a custom type"
         yield cls
 
+    @staticmethod
+    @abstractmethod
+    def _check(value: PathType) -> Path:
+        """
+        performs extra checks
 
-class OpenablePath(StrictPath):
+        must return an object of type pathlib.Path
+        """
+        raise NotImplementedError("the deriving class must override this")
+
+
+class OpenablePath(StrictPath, Path):
     "Will only take a file that's able to be read"
 
     @staticmethod
-    def _check(filename: Union[str, Path, None] = None) -> Path:
+    def _check(value: PathType) -> Path:
         "checks that the filename is a valid path, and returns it"
-        if not filename:
+        if not value:
             message = "must pass a filename"
             log.exception(message)
             raise ArgumentValidationError(message)
 
-        path = Path(filename).resolve()
+        path = Path(value).resolve()
 
         if not path.is_file():
             message = f"'{path}' is not a file"
@@ -118,16 +94,18 @@ class OpenablePath(StrictPath):
         return path
 
 
-class Directory(StrictPath):
+class Directory(StrictPath, Path):
     "A type that indicates a directory that exists and is writeable"
 
     @staticmethod
-    def _check(filename: Union[str, Path, None] = None) -> Path:
+    def _check(value: PathType) -> Path:
         "checks that the folder name is a valid, writeable path, and returns it"
-        if not filename:
-            path = Path().resolve(strict=False)
-        else:
-            path = Path(filename).resolve(strict=False)
+        if not value:
+            message = "must pass a filename"
+            log.exception(message)
+            raise ArgumentValidationError(message)
+
+        path = Path(value).resolve(strict=True)
 
         if not path.is_dir() and path.exists():
             message = f"'{path}' is not a directory"

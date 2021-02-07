@@ -55,9 +55,6 @@ disable = [
 [tool.pylint.format]
 max-line-length = "88"
 
-[tool.pylint.message_control]
-disable = ""
-
 [tool.poetry.scripts]
 generate-playlists = "mw_playlist_generator.__main__:main"
 

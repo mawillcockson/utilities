@@ -41,9 +41,7 @@ def save_config(config: ConfigParser, settings: Settings) -> str:
     save the configuration to the file indicated in settings
     returns the config file contents as a string
     """
-    # NOTE: Because neither Directory nor OpenablePath are subclasses of Path,
-    # this wrapping is needed in order to compare them
-    if Path(str(settings.cache)) == Path(settings.config.parent):
+    if settings.cache == Directory(settings.config.parent):
         settings_dict = settings.dict(exclude={"config", "cache"})
     else:
         settings_dict = settings.dict(exclude={"config"})

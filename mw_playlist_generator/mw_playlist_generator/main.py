@@ -4,7 +4,7 @@ This is the main file that is run when the tool is used
 """
 import logging
 from pathlib import Path
-from typing import List, Optional, Sequence, Union
+from typing import List, Optional, Sequence
 
 import decli
 from pydantic import BaseModel  # pylint: disable=no-name-in-module
@@ -103,19 +103,14 @@ def urls_in_file(url_file: Path) -> UrlsFile:
         for line in file:
             url = line.strip()
             urls.append(url)
-            log.debug(
-                "added url from '%s' -> '%s'",
-                url_file,
-                url,
-            )
+            log.debug("added url from '%s' -> '%s'", url_file, url)
 
     log.debug(urls)
     # NOTE:BUG should catch pydantic errors
     return UrlsFile(filepath=url_file, urls=urls)
 
 
-# NOTE:FUTURE::TYPES when Directory is a subclass of Path, this will be redundant
-def gather_urls(urls_folder: Union[Directory, Path]) -> List[UrlsFile]:
+def gather_urls(urls_folder: Path) -> List[UrlsFile]:
     "finds all of the files in the urls folder and collects the urls from each"
     if not urls_folder.is_dir():
         raise ValueError(f"'{urls_folder}' is not a directory")
@@ -157,15 +152,12 @@ def download_videos(
     return video_files
 
 
-# NOTE:FUTURE::TYPES when Directory is a subclass of Path, this will be redundant
 def make_playlist(
     urls_file: UrlsFile,
-    playlists_folder: Union[Directory, Path],
-    video_files: List[VideoFile],
+    playlists_folder: Path,
+    video_files: List[Path],
 ) -> Playlist:
     "takes video files and a playlist name, and makes the playlist"
-    # NOTE:FUTURE::TYPES when Directory is a subclass of Path, this will be redundant
-    playlists_folder = Path(str(playlists_folder))
     # Build playlist file name, and create it if it doesn't exist
     playlist_name = OpenablePath(urls_file.filepath).stem
     playlist_file = OpenablePath(
@@ -194,27 +186,25 @@ def make_playlist(
         playlist_file.write_text("\n".join(updated_contents))
 
     # Filter out the new videos
-    new_videos = set(
-        Path(str(video_file.filepath)) for video_file in video_files
-    ) - set(current_videos)
+    new_videos = set(video_files) - set(current_videos)
     if not new_videos:
         log.debug("no change to playlist '%s'", playlist_file)
         return Playlist(filepath=playlist_file, videos=current_videos)
 
     # Add new video files in the order that they appear in video_files
     for video_file in video_files:
-        if not Path(str(video_file.filepath)) in new_videos:
+        if not video_file in new_videos:
             continue
 
         log.debug(
             "add to playlist '%(playlist_file)s' <- '%(video_file)s'",
             {"playlist_file": playlist_file, "video_file": video_file},
         )
-        current_videos.append(Path(str(video_file.filepath)))
+        current_videos.append(video_file)
         # Prevents duplicates from being added, in conjunction with the "in"
         # check at the beginning of the loop.
         # set.discard() does not raise KeyError if key does not exist
-        new_videos.discard(Path(str(video_file.filepath)))
+        new_videos.discard(video_file)
 
     log.info("playlist updated '%s'", playlist_file)
     return Playlist(filepath=playlist_file, videos=current_videos)
@@ -255,7 +245,9 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
     for file in urls_files:
         video_files = download_videos(urls_file=file, ytdl_options=ytdl_options)
         make_playlist(
-            urls_file=file, playlists_folder=settings.playlists, video_files=video_files
+            urls_file=file,
+            playlists_folder=settings.playlists,
+            video_files=[video.filepath for video in video_files],
         )
 
 
