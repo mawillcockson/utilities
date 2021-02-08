@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "mw_playlist_generator"
-version = "1.0.0"
+version = "1.0.1"
 description = "A youtube-dl wrapper for generating playlists of videos"
 authors = ["Matthew Willcockson <matthew@willcockson.family>"]
 license = "MIT"

@@ -18,7 +18,6 @@ def filter_inaccessible(files: Iterable[Union[str, Path]]) -> Iterable[Path]:
             path = Path(file).resolve(strict=True)
             with path.open() as temporary_file:
                 temporary_file.read(0)
+            yield path
         except OSError:
             log.debug("filtered '%s'", file)
-
-        yield path
